@@ -269,3 +269,61 @@ test('restore with cache found for restore key', async () => {
   expect(extractTarMock).toHaveBeenCalledWith(archivePath, compression)
   expect(getCompressionMock).toHaveBeenCalledTimes(1)
 })
+
+test('check key only with cache found for restore key', async () => {
+  const paths = ['node_modules']
+  const key = 'node-test'
+  const restoreKey = 'node-'
+  const checkKeyOnly = true
+
+  const infoMock = jest.spyOn(core, 'info')
+
+  const cacheEntry: ArtifactCacheEntry = {
+    cacheKey: restoreKey,
+    scope: 'refs/heads/main',
+    archiveLocation: 'www.actionscache.test/download'
+  }
+  const getCacheMock = jest.spyOn(cacheHttpClient, 'getCacheEntry')
+  getCacheMock.mockImplementation(async () => {
+    return Promise.resolve(cacheEntry)
+  })
+  const tempPath = '/foo/bar'
+
+  const createTempDirectoryMock = jest.spyOn(cacheUtils, 'createTempDirectory')
+  createTempDirectoryMock.mockImplementation(async () => {
+    return Promise.resolve(tempPath)
+  })
+
+  const archivePath = path.join(tempPath, CacheFilename.Zstd)
+  const downloadCacheMock = jest.spyOn(cacheHttpClient, 'downloadCache')
+
+  const fileSize = 142
+  const getArchiveFileSizeInBytesMock = jest
+    .spyOn(cacheUtils, 'getArchiveFileSizeInBytes')
+    .mockReturnValue(fileSize)
+
+  const extractTarMock = jest.spyOn(tar, 'extractTar')
+  const compression = CompressionMethod.Zstd
+  const getCompressionMock = jest
+    .spyOn(cacheUtils, 'getCompressionMethod')
+    .mockReturnValue(Promise.resolve(compression))
+
+  const cacheKey = await restoreCache(paths, key, [restoreKey], { checkKeyOnly: true } )
+
+  expect(cacheKey).toBe(restoreKey)
+  expect(getCacheMock).toHaveBeenCalledWith([key, restoreKey], paths, {
+    compressionMethod: compression
+  })
+  expect(createTempDirectoryMock).toHaveBeenCalledTimes(1)
+  expect(downloadCacheMock).toHaveBeenCalledWith(
+    cacheEntry.archiveLocation,
+    archivePath,
+    undefined
+  )
+  expect(getArchiveFileSizeInBytesMock).toHaveBeenCalledWith(archivePath)
+  expect(infoMock).toHaveBeenCalledWith(`Cache Size: ~0 MB (142 B)`)
+
+  expect(extractTarMock).toHaveBeenCalledTimes(1)
+  expect(extractTarMock).toHaveBeenCalledWith(archivePath, compression)
+  expect(getCompressionMock).toHaveBeenCalledTimes(1)
+})

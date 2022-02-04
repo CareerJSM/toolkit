@@ -86,6 +86,10 @@ export async function restoreCache(
     return undefined
   }
 
+  if (options.checkKeyOnly) {
+    return cacheEntry.cacheKey
+  }
+
   const archivePath = path.join(
     await utils.createTempDirectory(),
     utils.getCacheFileName(compressionMethod)

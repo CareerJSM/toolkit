@@ -46,6 +46,14 @@ export interface DownloadOptions {
    * @default 30000
    */
   timeoutInMs?: number
+
+  /**
+   * Check if cache key exists and exit.
+   * Skip download and extraction.
+   *
+   * @default false
+   */
+   checkKeyOnly?: boolean
 }
 
 /**
@@ -84,7 +92,8 @@ export function getDownloadOptions(copy?: DownloadOptions): DownloadOptions {
   const result: DownloadOptions = {
     useAzureSdk: true,
     downloadConcurrency: 8,
-    timeoutInMs: 30000
+    timeoutInMs: 30000,
+    checkKeyOnly: false
   }
 
   if (copy) {
@@ -99,11 +108,16 @@ export function getDownloadOptions(copy?: DownloadOptions): DownloadOptions {
     if (typeof copy.timeoutInMs === 'number') {
       result.timeoutInMs = copy.timeoutInMs
     }
+
+    if (typeof copy.checkKeyOnly === 'boolean') {
+      result.checkKeyOnly = copy.checkKeyOnly
+    }
   }
 
   core.debug(`Use Azure SDK: ${result.useAzureSdk}`)
   core.debug(`Download concurrency: ${result.downloadConcurrency}`)
   core.debug(`Request timeout (ms): ${result.timeoutInMs}`)
+  core.debug(`Check Key Only: ${result.checkKeyOnly}`)
 
   return result
 }
