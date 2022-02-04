@@ -86,7 +86,7 @@ export async function restoreCache(
     return undefined
   }
 
-  if (options.checkKeyOnly) {
+  if (options?.checkKeyOnly) {
     return cacheEntry.cacheKey
   }
 

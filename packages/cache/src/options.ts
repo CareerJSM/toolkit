@@ -53,7 +53,7 @@ export interface DownloadOptions {
    *
    * @default false
    */
-   checkKeyOnly?: boolean
+  checkKeyOnly?: boolean
 }
 
 /**

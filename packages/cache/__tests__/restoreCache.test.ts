@@ -294,7 +294,6 @@ test('check key only with cache found for restore key', async () => {
     return Promise.resolve(tempPath)
   })
 
-  const archivePath = path.join(tempPath, CacheFilename.Zstd)
   const downloadCacheMock = jest.spyOn(cacheHttpClient, 'downloadCache')
 
   const fileSize = 142
@@ -308,22 +307,18 @@ test('check key only with cache found for restore key', async () => {
     .spyOn(cacheUtils, 'getCompressionMethod')
     .mockReturnValue(Promise.resolve(compression))
 
-  const cacheKey = await restoreCache(paths, key, [restoreKey], { checkKeyOnly: true } )
+  const cacheKey = await restoreCache(paths, key, [restoreKey], {
+    checkKeyOnly
+  })
 
   expect(cacheKey).toBe(restoreKey)
   expect(getCacheMock).toHaveBeenCalledWith([key, restoreKey], paths, {
     compressionMethod: compression
   })
-  expect(createTempDirectoryMock).toHaveBeenCalledTimes(1)
-  expect(downloadCacheMock).toHaveBeenCalledWith(
-    cacheEntry.archiveLocation,
-    archivePath,
-    undefined
-  )
-  expect(getArchiveFileSizeInBytesMock).toHaveBeenCalledWith(archivePath)
-  expect(infoMock).toHaveBeenCalledWith(`Cache Size: ~0 MB (142 B)`)
-
-  expect(extractTarMock).toHaveBeenCalledTimes(1)
-  expect(extractTarMock).toHaveBeenCalledWith(archivePath, compression)
+  expect(createTempDirectoryMock).not.toHaveBeenCalled()
+  expect(downloadCacheMock).not.toHaveBeenCalled()
+  expect(getArchiveFileSizeInBytesMock).not.toHaveBeenCalled()
+  expect(infoMock).not.toHaveBeenCalled()
+  expect(extractTarMock).not.toHaveBeenCalled()
   expect(getCompressionMock).toHaveBeenCalledTimes(1)
 })

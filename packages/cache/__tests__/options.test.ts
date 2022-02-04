@@ -10,6 +10,7 @@ const downloadConcurrency = 8
 const timeoutInMs = 30000
 const uploadConcurrency = 4
 const uploadChunkSize = 32 * 1024 * 1024
+const checkKeyOnly = false
 
 test('getDownloadOptions sets defaults', async () => {
   const actualOptions = getDownloadOptions()
@@ -17,7 +18,8 @@ test('getDownloadOptions sets defaults', async () => {
   expect(actualOptions).toEqual({
     useAzureSdk,
     downloadConcurrency,
-    timeoutInMs
+    timeoutInMs,
+    checkKeyOnly
   })
 })
 
@@ -25,7 +27,8 @@ test('getDownloadOptions overrides all settings', async () => {
   const expectedOptions: DownloadOptions = {
     useAzureSdk: false,
     downloadConcurrency: 14,
-    timeoutInMs: 20000
+    timeoutInMs: 20000,
+    checkKeyOnly: false
   }
 
   const actualOptions = getDownloadOptions(expectedOptions)
